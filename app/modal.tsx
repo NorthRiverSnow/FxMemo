@@ -1,29 +1,103 @@
-import { Link } from 'expo-router';
-import { StyleSheet } from 'react-native';
+import { ParallaxScrollView } from "@/components/parallax-scroll-view"
+import { ThemedLabelAndText } from "@/components/themed-label-and-text"
+import { ThemedLabelAndArea } from "@/components/themed-label-and-textArea"
+import { ThemedSafeAreaView } from "@/components/themed-safe-area-view"
+import { ThemedText } from "@/components/themed-text"
+import { ThemedView } from "@/components/themed-view"
+import { IconSymbol } from "@/components/ui/icon-symbol"
+import type { TradeSchemaType } from "@/hooks/schemas/add-deal"
+import { useThemeColor } from "@/hooks/use-theme-color"
+import { selectTradeDetails } from "@/sqlite/trade-details"
+import {
+	formatDate,
+	translateCurrencyType,
+	translateTradeSide,
+	translateTradeType,
+} from "@/utils/utils"
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router"
+import { useCallback, useState } from "react"
+import { Pressable, StyleSheet } from "react-native"
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+type Params = { tradeId: string }
+export default function AddDealScreen() {
+	const params = useLocalSearchParams<Params>()
+	const router = useRouter()
+	const [data, setData] = useState<TradeSchemaType | undefined>(undefined)
+	const fontColor = useThemeColor({}, "text")
 
-export default function ModalScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title">This is a modal</ThemedText>
-      <Link href="/" dismissTo style={styles.link}>
-        <ThemedText type="link">Go to home screen</ThemedText>
-      </Link>
-    </ThemedView>
-  );
+	useFocusEffect(
+		useCallback(() => {
+			const fetchData = async () => {
+				const ret = await selectTradeDetails(params.tradeId)
+				setData(ret)
+			}
+			fetchData()
+		}, [params.tradeId]),
+	)
+	return (
+		<ThemedSafeAreaView style={{ flex: 1 }}>
+			<ParallaxScrollView headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}>
+				<ThemedView style={styles.titleContainer}>
+					<Pressable onPress={() => router.back()}>
+						<IconSymbol name="chevron.left" color={fontColor} size={20} />
+					</Pressable>
+					<ThemedText type="title">取引詳細</ThemedText>
+				</ThemedView>
+				{data && (
+					<>
+						<ThemedLabelAndText text={formatDate(data.tradeDate)} label="取引日付：" />
+						<ThemedLabelAndText
+							text={translateCurrencyType(data.currencyType)}
+							label="取引通貨："
+						/>
+						<ThemedLabelAndText text={translateTradeType(data.tradeType)} label="取引タイプ：" />
+						<ThemedLabelAndText text={translateTradeSide(data.tradeSide)} label="注文：" />
+						<ThemedLabelAndText text={data.tradePrice} label="取得価格：" />
+						<ThemedLabelAndText text={data.lotSize} label="ロット数：" />
+						<ThemedLabelAndArea
+							text={data.technicalAnalysis.bollingerBand}
+							label="ボリンジャーバンド"
+						/>
+						<ThemedLabelAndArea text={data.technicalAnalysis.macd} label="Macd" />
+						<ThemedLabelAndArea text={data.technicalAnalysis.rsi} label="RSI" />
+						<ThemedLabelAndArea text={data.technicalAnalysis.formation} label="フォーメーション" />
+						<ThemedLabelAndArea
+							text={data.technicalAnalysis.supportResistance}
+							label="抵抗/支持ライン"
+						/>
+					</>
+				)}
+			</ParallaxScrollView>
+		</ThemedSafeAreaView>
+	)
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-});
+	titleContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 8,
+	},
+	container: {
+		flexDirection: "column",
+		alignItems: "center",
+	},
+	labelAndInput: {
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "flex-start",
+		width: "100%",
+		marginLeft: 12,
+	},
+	input: {
+		fontSize: 16,
+		lineHeight: 24,
+		paddingVertical: 10,
+		paddingHorizontal: 14,
+		alignSelf: "flex-start",
+		flexDirection: "row",
+	},
+	label: {
+		marginRight: 12,
+	},
+})
