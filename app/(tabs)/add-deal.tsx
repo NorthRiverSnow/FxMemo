@@ -130,7 +130,7 @@ export default function AddDealScreen() {
 					name="technicalAnalysis.bollingerBand"
 					render={({ field: { onChange, value } }) => (
 						<ThemedTextAreaInput
-							label="ボリンガーバンド"
+							label="ボリンジャーバンド"
 							value={value}
 							setValue={onChange}
 							style={styles.inputCommon}

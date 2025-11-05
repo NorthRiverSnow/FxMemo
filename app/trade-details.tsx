@@ -5,43 +5,28 @@ import { ThemedSafeAreaView } from "@/components/themed-safe-area-view"
 import { ThemedText } from "@/components/themed-text"
 import { ThemedView } from "@/components/themed-view"
 import { IconSymbol } from "@/components/ui/icon-symbol"
-import type { TradeSchemaType } from "@/hooks/schemas/add-deal"
-import { useThemeColor } from "@/hooks/use-theme-color"
-import { selectTradeDetails } from "@/sqlite/trade-details"
+import { useTradeDetails } from "@/hooks/features/use-trade-details"
 import {
 	formatDate,
 	translateCurrencyType,
 	translateTradeSide,
 	translateTradeType,
 } from "@/utils/utils"
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router"
-import { useCallback, useState } from "react"
 import { Pressable, StyleSheet } from "react-native"
-
-type Params = { tradeId: string }
-export default function AddDealScreen() {
-	const params = useLocalSearchParams<Params>()
-	const router = useRouter()
-	const [data, setData] = useState<TradeSchemaType | undefined>(undefined)
-	const fontColor = useThemeColor({}, "text")
-
-	useFocusEffect(
-		useCallback(() => {
-			const fetchData = async () => {
-				const ret = await selectTradeDetails(params.tradeId)
-				setData(ret)
-			}
-			fetchData()
-		}, [params.tradeId]),
-	)
+export default function tradeDealScreen() {
+	const { data, errorMessage, handleDelete, fontColor, router } = useTradeDetails()
 	return (
 		<ThemedSafeAreaView style={{ flex: 1 }}>
 			<ParallaxScrollView headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}>
+				<ThemedText>{errorMessage}</ThemedText>
 				<ThemedView style={styles.titleContainer}>
 					<Pressable onPress={() => router.back()}>
 						<IconSymbol name="chevron.left" color={fontColor} size={20} />
 					</Pressable>
 					<ThemedText type="title">取引詳細</ThemedText>
+					<Pressable onPress={handleDelete} style={styles.deleteIcon}>
+						<IconSymbol name="trash" color={fontColor} size={20} />
+					</Pressable>
 				</ThemedView>
 				{data && (
 					<>
@@ -99,5 +84,14 @@ const styles = StyleSheet.create({
 	},
 	label: {
 		marginRight: 12,
+	},
+	deleteIcon: {
+		marginLeft: "auto",
+		backgroundColor: "red",
+		borderRadius: 8,
+		paddingVertical: 6,
+		paddingHorizontal: 10,
+		justifyContent: "center",
+		alignItems: "center",
 	},
 })

@@ -27,6 +27,7 @@ const MAPPING = {
 	"calendar.circle.fill": "calendar-today",
 	"arrowtriangle.down.fill": "arrow-drop-down-circle",
 	"chevron.left": "arrow-back",
+	trash: "delete",
 } as IconMapping
 
 /**

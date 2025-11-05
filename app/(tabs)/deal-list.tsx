@@ -58,7 +58,10 @@ export default function HomeScreen() {
 					<ThemedText type="title">取引一覧</ThemedText>
 				</ThemedView>
 				{tradeList.map((x) => (
-					<Pressable key={x.tradeId} onPress={() => router.push(`/modal?tradeId=${x.tradeId}`)}>
+					<Pressable
+						key={x.tradeId}
+						onPress={() => router.push(`/trade-details?tradeId=${x.tradeId}`)}
+					>
 						<ThemedView style={styles.titleContainer}>
 							<IconSymbol name={getCurrencyIconName(x.currencyType)} color="#f3ca00" size={50} />
 							<ThemedText>
